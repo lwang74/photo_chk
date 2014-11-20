@@ -1,5 +1,7 @@
 require 'mechanize'
 require 'json'
+require 'FileUtils'
+require './ImgDB'
 
 class MyPhoto
 	def initialize
@@ -16,6 +18,13 @@ class MyPhoto
 		@max_thread = 20
 		@q = Queue.new
 		@MAX_NUM = 99999
+		@db = DB.new
+	end
+
+	def download_auto
+		start_number = @db.get_last_id().to_i
+		number_len = @db.get_max_number().to_i
+		download(start_number, number_len)
 	end
 
 	def download start_number, number_len
@@ -92,8 +101,23 @@ class MyPhoto
 
 	def download_one_image id, img_src, img_file, thread_no
 		begin
-			local_file = "photos/#{id}_#{img_file}"
-			if !File.exists?(local_file)
+			# local_file = "photos/#{id}_#{img_file}"
+			# if !File.exists?(local_file)
+			if !@db.get_it(id, img_file)
+				now = Time.new
+				local_path = "photos_"
+				local_file = ""
+				if /^(\d{4}\-\d{2}\-\d{2})\s/=~now.to_s
+					date = $1
+					local_path += "#{date}"
+					local_file = "#{local_path}/#{id}_#{img_file}"
+				else
+					puts "*** Time format error!"
+				end
+				@db.insert_not_exists(id, img_file, now)
+				@db.upd_last_id(id)
+				FileUtils.mkdir_p local_path
+
 				# p img_src
 				@agent.get(img_src).save(local_file)
 				puts "#{thread_no}:#{id} => #{img_file}"
@@ -117,7 +141,14 @@ class MyPhoto
 	end
 end
 
-if ARGV.size==2
+# if ARGV.size==2
+# 	myP = MyPhoto.new
+# 	myP.download ARGV[0].to_i, ARGV[1].to_i
+# end
+if ARGV.size==0
 	myP = MyPhoto.new
-	myP.download ARGV[0].to_i, ARGV[1].to_i
+	myP.download_auto
 end
+
+# now = Time.new
+# p FileUtils.mkdir_p "photos_2014-11-20"

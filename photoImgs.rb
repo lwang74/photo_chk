@@ -1,39 +1,26 @@
-require 'pp'
-require 'rubygems'
-require 'sqlite3'
-require 'digest/md5'
-
-include SQLite3
-include Digest
-
-class DB
-	def initialize 
-		@db = Database.new("images.db")
-	end
-
-	def insert id, img, md5
-		@db.execute("insert into images (id, img, md5) values (#{id}, '#{img}','#{md5}')")
-	end
-
-	def get_10000
-		@db.execute("select top 1000 * from images") do |row|
-		  p row  # row は結果の行で、各列の値が配列で返ってくる
-		end
-	end
-end
+require './ImgDB'
 
 db = DB.new
 
 PATH = 'photos'
 Dir["#{PATH}/*"].each{|one|
-	if /^photos\/(.+)_(.+)$/=~one
+	if /^photos\/([^_]+)_(.+)$/=~one
 		id = $1
 		img = $2
-		md5 = MD5.file(one).hexdigest
-		db.insert(id, img, md5)
+		# md5 = MD5.file(one).hexdigest
+		# puts "#{id}-#{img}"
+		file = File.new(one)
+		db.insert_not_exists(id, img, file.mtime)
 	else
 		puts one
 	end
 }
 
-db.get_10000
+# file = File.new('photos/07220_1407812971034_d3295d033639.jpg')
+# p file.atime
+# p file.ctime
+# p file.mtime
+
+# db.get_10000
+# p db.get "00024","10495108648380420.jpg"
+
