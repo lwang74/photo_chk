@@ -105,15 +105,19 @@ class MyPhoto
 			# if !File.exists?(local_file)
 			if !@db.get_it(id, img_file)
 				now = Time.new
-				local_path = "photos_"
-				local_file = ""
-				if /^(\d{4}\-\d{2}\-\d{2})\s/=~now.to_s
-					date = $1
-					local_path += "#{date}"
-					local_file = "#{local_path}/#{id}_#{img_file}"
-				else
-					puts "*** Time format error!"
-				end
+				# local_path = "photos_"
+				# local_file = ""
+				# if /^(\d{4}\-\d{2}\-\d{2})\s/=~now.to_s
+				# 	date = $1
+				# 	local_path += "#{date}"
+				# 	local_file = "#{local_path}/#{id}_#{img_file}"
+				# else
+				# 	puts "*** Time format error!"
+				# end
+
+				local_path = now.strftime("photos_%Y-%m-%d")
+				local_file = "#{local_path}/#{id}_#{img_file}"
+
 				@db.insert_not_exists(id, img_file, now)
 				@db.upd_last_id(id)
 				FileUtils.mkdir_p local_path
