@@ -4,7 +4,8 @@ require 'FileUtils'
 require './ImgDB'
 
 class MyPhoto
-	def initialize
+	def initialize top_path
+		@top_path = top_path
 		@agent = Mechanize.new
 		@agent.user_agent_alias = "Windows IE 9"
 		# url = 'http://photo.app887.com/download.html'
@@ -115,7 +116,7 @@ class MyPhoto
 				# 	puts "*** Time format error!"
 				# end
 
-				local_path = now.strftime("photos_%Y-%m-%d")
+				local_path = "#{@top_path}/#{now.strftime("photos_%Y-%m-%d")}"
 				local_file = "#{local_path}/#{id}_#{img_file}"
 
 				@db.insert_not_exists(id, img_file, now)
@@ -150,7 +151,7 @@ end
 # 	myP.download ARGV[0].to_i, ARGV[1].to_i
 # end
 if ARGV.size==0
-	myP = MyPhoto.new
+	myP = MyPhoto.new('D:/lwang/photos')
 	myP.download_auto
 end
 
