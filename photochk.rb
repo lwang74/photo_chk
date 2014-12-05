@@ -119,12 +119,14 @@ class MyPhoto
 				local_path = "#{@top_path}/#{now.strftime("photos_%Y-%m-%d")}"
 				local_file = "#{local_path}/#{id}_#{img_file}"
 
-				@db.insert_not_exists(id, img_file, now)
-				@db.upd_last_id(id)
+				# @db.insert_not_exists(id, img_file, now)
+				# @db.upd_last_id(id)
 				FileUtils.mkdir_p local_path
 
 				# p img_src
 				@agent.get(img_src).save(local_file)
+				@db.insert_not_exists(id, img_file, now)
+				@db.upd_last_id(id)
 				puts "#{thread_no}:#{id} => #{img_file}"
 			end
 		rescue Exception => e
